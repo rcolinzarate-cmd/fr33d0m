@@ -1,0 +1,26 @@
+# Build outputs
+build/
+.build/
+*.ipa
+*.deb
+*.dSYM.zip
+Payload/
+
+# macOS/Xcode cruft
+.DS_Store
+xcuserdata/
+*.xcworkspace/xcuserdata/
+DerivedData/
+
+# Dopamine's build artifacts (inside submodule)
+upstream/build/
+upstream/.build/
+
+# Theos
+theos_build/
+_theos_build/
+
+# Local secrets (never commit)
+*.p12
+*.mobileprovision
+AuthKey*.p8

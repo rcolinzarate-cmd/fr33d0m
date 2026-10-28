@@ -1,0 +1,65 @@
+name: Build fr33d0m.ipa
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 120
+    steps:
+      - name: Checkout fr33d0m + submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          fetch-depth: 1
+
+      - name: Install build dependencies
+        run: |
+          brew install ldid make xcodegen procursus/apt/dpkg-tools || true
+          # Dopamine requires specific tools
+          brew install coreutils
+
+      - name: Install Theos (for tweak compilation)
+        run: |
+          git clone --recursive https://github.com/theos/theos.git $HOME/theos
+          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+          echo "$HOME/theos/bin" >> $GITHUB_PATH
+
+      - name: Download iOS SDKs
+        run: |
+          cd $HOME/theos/sdks
+          wget -q https://github.com/theos/sdks/archive/master.zip -O sdks.zip
+          unzip -q sdks.zip
+          mv sdks-master/*.sdk .
+          rm -rf sdks-master sdks.zip
+
+      - name: Apply fr33d0m patches to upstream
+        run: |
+          cd upstream
+          # Aplicar nuestros patches de rebrand + customizaciones
+          if [ -d ../patches ]; then
+            for p in ../patches/*.patch; do
+              [ -f "$p" ] && git apply --ignore-whitespace "$p" || echo "skip $p"
+            done
+          fi
+
+      - name: Build Dopamine upstream (unmodified for now, Fase 1)
+        run: |
+          cd upstream
+          # TODO Fase 1: hacer el build pasar sin cambios
+          # El build real de Dopamine usa su propio Makefile y xcodebuild
+          # Documentado en upstream/README.md una vez clonado
+          echo "Build setup placeholder - requires full Dopamine toolchain"
+          # make package || echo "Build no implementado aún en CI"
+
+      - name: Upload artifact (placeholder)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fr33d0m-build-log
+          path: upstream/
+          retention-days: 7
+          if-no-files-found: ignore
